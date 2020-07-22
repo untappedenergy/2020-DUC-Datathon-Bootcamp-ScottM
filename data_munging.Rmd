@@ -12,36 +12,175 @@ opinion, which is why I love teaching it.
 
 The agenda for this 1 hour bootcamp includes:
 
-1. Loading data
-2. Tidy data concepts
-3. Working with dates
-4. Static vs. dynamic typed languages
-4. Functional programming vs. object oriented programming
-5. Data Structures
+1. Loading data w/ readr
+2. Dates and times w/ lubridate
+3. Tidy data concepts w/ tidyr
+4. Feature engineering w/ dplyr
+5. Visualization w/ ggplot2
+
+We will need the following libraries for this bootcamp
 
 ```{r}
 library(tidyverse)
+library(lubridate)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
 ```
 
-## Loading data
+## Loading data w/ readr
+
+The first thing we need to do with data is consistently load it. R has some 
+basic functionality with `read.csv`, and data.table is the best for large
+datasets, using `fread`, but here we are going to demo a load an inspect for
+the demo data.
+
+https://readr.tidyverse.org/
+Check out the cheat shhet here, paying attention to the 'write' functions
+
+My general formula for loading data:
+1) Load it (does it fail?)
+2) Run head()
+3) Look at the dimensions
+4) Check the column data types
 
 ```{r}
 treatments = readr::read_csv("./data/PerfTreatment_subset.csv")
 
-well_header = readr::read_csv("./data/WellHeader_subset.csv")
+#old school
+head(treatments)
+dim(treatments)
+str(treatments)
+summary(treatments)
 
-production = readr::read_csv("./data/WellProduction_subset.csv")
-
+#lazy school
+colnames(treatments)
+treatments
 ```
 
-## Tidy data concepts
+```{r}
+well_header = readr::read_csv("./data/WellHeader_subset.csv")
+well_header
+colnames(well_header)
+str(well_header)
+```
 
-`production` is a long table
-`well_header` and `treatments` are wide tables
+```{r}
+production = readr::read_csv("./data/WellProduction_subset.csv")
+production
+colnames(production)
+str(production)
+```
+
+## Dates and times w/ lubridate
+
+https://lubridate.tidyverse.org/
+
+Working with dates is hard and constantly a struggle, especially when working
+with excel. I would really encourage everyone to look at and follow the
+ISO8601 format.
+
+```{r}
+production$date = date(production$ProdPeriod)
+unique(production$date)
+
+# make a sequence
+date_seq = seq(min(production$date), max(production$date), by = "month")
+
+# compare this
+single_well <- production %>%
+  filter(EPAssetsId == 2225574) %>%
+  spread(key=ProdType, value=Volume)
+
+# with this
+single_well <- production %>%
+  filter(EPAssetsId == 2225574) %>%
+  select(date, ProdType, Volume) %>%
+  spread(key=ProdType, value=Volume)
+```
+
+## Tidy data concepts w/ tidyr
+
+There is a well defined concept of 'tidy data' which is well summarized in this paper:
+
+https://vita.had.co.nz/papers/tidy-data.pdf
+
+To quote the paper, in tidy data:
+1. Each variable forms a column.
+2. Each observation forms a row.
+3. Each type of observational unit forms a table.
+
+The concept of 'wide' and 'long' tables is really important in data science,
+and worth chatting about. In our dataset, `production` is a long table and
+`well_header` and `treatments` are wide tables. 
+
+Long tables are pretty nice when doing summaries and graphs, but can be difficult
+to use in machine learning models or summarize properly. For example, if you
+wanted to facet a ggplot among several groups, you will need a long table.
+
+```{r}
+# why long plots are useful
+ggplot(production) +
+  geom_histogram(aes(x=Volume)) +
+  facet_wrap(. ~ ProdType, scales='free')
+```
+
+But we can pivot tables back and forth relatively easily in R using the tidyr package. Read more and check out the cheat sheet here:
+
+https://tidyr.tidyverse.org/
+
+```{r}
+# long to wide
+prod_wide = spread(
+  production, 
+  key=ProdType, 
+  value=Volume
+  )
+
+# wide to long
+treat_long = gather(
+  treatments, 
+  'IntervalTop','IntervalBase', 
+  key="interval",
+  value="md")
+```
+
+There are two packages I use for dealing with missing values. Most machine learning models and correlation analyses need complete, clean datasets, so 
+missing values tend to be a bane of our data science existence. I will cover 
+a column imputer framework next session, but tidyr has some great functions 
+for dealing with NA (not applicable) values: `drop_na`, `fill`, and `replace_na`.
+
+```{r}
+single_well
+
+single_well %>% drop_na()
+
+single_well %>% tidyr::fill(.direction="up")
+
+single_well %>% 
+```
+
+
+## Feature engineering w/ dplyr
+
+Dplyr provides a consistent interface for data munging.
+
+https://dplyr.tidyverse.org/
 
 ```{r}
 
 ```
 
-## Working with dates
+## Visualization w/ ggplot2
+
+ggplot2 (grammar of graphics plotting) is in my opinion the best user interface
+for static plots. There are so many visualization tools that no single tool
+will be the best, but ggplot2 often beats any other tool I use.
+
+https://ggplot2.tidyverse.org/
+
+```{r}
+
+```
+
 
