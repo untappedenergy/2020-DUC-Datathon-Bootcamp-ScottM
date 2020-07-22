@@ -1,0 +1,21 @@
+---
+title: "Machine Learning Fundamentals"
+author: "Scott McKean"
+date: "7/29/2020"
+output: html_document
+---
+
+This notebook provides a very short and high level introducction to machine
+learning using the MLR package. The agenda for this 1 hour bootcamp includes:
+
+1. Intro to machine learning
+2. Intro to MLR
+3. Correlation 
+4. Train/test splits
+5. Model building
+6. Predictions
+7. Bringing it all together
+
+```{r}
+library(mlr)
+```

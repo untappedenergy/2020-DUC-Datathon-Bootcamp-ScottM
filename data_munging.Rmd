@@ -1,0 +1,47 @@
+---
+title: "Data Munging, Visualization, and Feature Engineering"
+author: "Scott McKean"
+date: "7/22/2020"
+output: html_document
+---
+
+This notebook provides an introduction to data munging in the tidyverse. Why
+tidyverse you might ask? Personally, I find it a really nice way to learn the 
+'grammar of graphics' and 'grammar of data' - probably the best intro in my 
+opinion, which is why I love teaching it.
+
+The agenda for this 1 hour bootcamp includes:
+
+1. Loading data
+2. Tidy data concepts
+3. Working with dates
+4. Static vs. dynamic typed languages
+4. Functional programming vs. object oriented programming
+5. Data Structures
+
+```{r}
+library(tidyverse)
+```
+
+## Loading data
+
+```{r}
+treatments = readr::read_csv("./data/PerfTreatment_subset.csv")
+
+well_header = readr::read_csv("./data/WellHeader_subset.csv")
+
+production = readr::read_csv("./data/WellProduction_subset.csv")
+
+```
+
+## Tidy data concepts
+
+`production` is a long table
+`well_header` and `treatments` are wide tables
+
+```{r}
+
+```
+
+## Working with dates
+
