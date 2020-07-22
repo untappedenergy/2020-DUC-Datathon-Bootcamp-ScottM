@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "R Foundations"
 author: "Scott McKean"
@@ -168,3 +169,175 @@ array[2]
 # dataframe
 new_df = data.frame(x = seq(1,5), y=2, z='col')
 ```
+=======
+---
+title: "R Foundations"
+author: "Scott McKean"
+date: "7/15/2020"
+output: html_document
+---
+
+This notebook provides some of the essentials to follow along with the 
+first R bootcamp: R Fundamentals. The agenda for this 1 hour bootcamp includes:
+
+1. R vs. Rstudio
+2. Installing Packages (CRAN, versions, etc.)
+3. Base R vs. Tidyverse vs. data.table
+4. Static vs. dynamic typed languages
+4. Functional programming vs. object oriented programming
+5. Data Structures
+
+There will actually be very little code in this bootcamp, with a focus more on
+discussing high level concepts and providing tips to get going in the R universe.
+
+## Installing R & RStudio
+
+First, let's differentiate R and R Studio. 
+
+R is an open-source statistical programming language. You can download it from:
+https://www.r-project.org/
+
+RStudio is a company that makes a great interactive development environment (IDE).
+You can download the IDE here:
+https://rstudio.com/products/rstudio/
+
+I'll present a quick 5-10 min intro to the IDE and language. 
+
+## Packages
+
+Packages (sometimes called libraries) are the lifeblood of open-source programming.
+
+A couple tips on packages:
+- They are linked to specific versions of R
+- They require periodic updates to stay 'current'
+- You may want to install a specific version to avoid breaking changes
+- Breaking changes are real, and the most annoying part of open-source
+
+So where do you look for packages?
+1. LMGTFY (let me google that for you)
+2. https://cran.r-project.org/
+3. Read vignettes - stupid word but really useful
+https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html
+
+```{r}
+# install a package
+install.packages('tidyverse')
+install.packages('data.table')
+
+# load a package
+library(tidyverse)
+library(data.table)
+
+# get some help
+help(tidyverse)
+help(dplyr)
+```
+
+## Base R vs. Tidyverse vs. data.table
+R has a complicated history and has some 'camps' that don't always agree on how
+things should be done. There are three main tribes:
+1. Base R
+2. Tidyverse
+3. data.table
+
+But, realistically, these tribes get along and play nicely, so don't be scared
+to cross over. I'm going to explain a little of each using a builtin dataset.
+As you can see - the approaches are really similar.
+
+I'm a tidyverse 'fanatic' as it goes, so the next two sessions will generally use
+tidyverse (and lots of pipes - love the pipe).
+
+```{r}
+cars_df = cars
+summary(cars_df)
+head(cars_df)
+
+# base R
+cars[cars$speed > 4,'dist']
+
+# tidyverse
+cars %>%
+  dplyr::filter(speed > 4) %>%
+  pull(dist)
+
+# data.table
+cars_dt = data.table::as.data.table(cars)
+cars_dt[speed >= 4, list(dist)]$dist
+```
+
+## Static vs. dynamic typed languages
+It's important to realize that R and Python are dynamically typed languages - 
+which means that you don't find problems until you run a code chunk. It also
+makes them much much nicer to iterate and code in (you'll understand if you 
+ever did C++ or likewise in undergrad).
+
+Also, it is best to assume that R makes a copy of almost everything, unlike 
+Python and Java. So keep that in mind when you are doing referencing. Here is
+a simple example.
+
+```{r}
+a = 2
+a
+a = 3
+a
+b = a
+a = 5
+c(a,b)
+```
+
+## Functional programming vs. object oriented programming
+This is a little philosophical, but I think very important when you are starting
+to program. There are two main ways to program - object oriented and functional.
+You'll run across both, but R is a combination of both approaches. I prefer to
+teach people functional programming first - it's less abstract and I find that it
+is easier to understand for scientists and engineers.
+
+Here is an example of a functional workflow with two custom functions
+in the Tidyverse style.
+
+```{r}
+feature_eng <- function(df){
+  return(df$speed*df$dist)
+}
+
+cars_feat <- cars %>%
+  dplyr::mutate(speeddist = feature_eng(.))
+
+adhoc_clust <- function(df){
+  case_when(
+    (df$speed>10)&(df$dist<20)   ~ 1,
+    (df$speed>10)&(df$dist>20)   ~ 2,
+    TRUE                         ~ 3
+    )
+}
+
+super_pipe <- cars %>%
+  dplyr::filter(speed > 10) %>%
+  dplyr::mutate(speeddist = feature_eng(.)) %>%
+  dplyr::mutate(adhoc_clust = adhoc_clust(.))
+```
+
+## Data Structures
+My last bit of advice before questions has to do around data structures.
+The heart of programming is data structures, which is why every introductory
+course starts with them. Here are a couple tips:
+
+1. Pass the simplest data structure possible to the function (an array instead of a dataframe).
+2. Bundle your variables in higher level data structures (lists/dataframes)
+3. Use consistent data structures throughout your analysis (dataframe vs. datatable)
+4. Pay attention to naming!!! Names are important
+5. I prefer the following structures in R, in order of preference 1) dataframe, 2) array, 3) list.
+
+```{r}
+# list
+cars_list <- list(cars$speed, cars$dist, 'cars')
+cars_list[1]
+
+# array
+array <- c(1,2,3)
+array[2]
+
+# dataframe
+new_df = data.frame(x = seq(1,5), y=2, z='col')
+```
+>>>>>>> 37c4018eed1a082e0081ceabc64c580a7884cc31
