@@ -72,33 +72,6 @@ colnames(production)
 str(production)
 ```
 
-## Dates and times w/ lubridate
-
-https://lubridate.tidyverse.org/
-
-Working with dates is hard and constantly a struggle, especially when working
-with excel. I would really encourage everyone to look at and follow the
-ISO8601 format.
-
-```{r}
-production$date = date(production$ProdPeriod)
-unique(production$date)
-
-# make a sequence
-date_seq = seq(min(production$date), max(production$date), by = "month")
-
-# compare this
-single_well <- production %>%
-  filter(EPAssetsId == 2225574) %>%
-  spread(key=ProdType, value=Volume)
-
-# with this
-single_well <- production %>%
-  filter(EPAssetsId == 2225574) %>%
-  select(date, ProdType, Volume) %>%
-  spread(key=ProdType, value=Volume)
-```
-
 ## Tidy data concepts w/ tidyr
 
 There is a well defined concept of 'tidy data' which is well summarized in this paper:
@@ -145,6 +118,33 @@ treat_long = gather(
   value="md")
 ```
 
+## Dates and times w/ lubridate
+
+https://lubridate.tidyverse.org/
+
+Working with dates is hard and constantly a struggle, especially when working
+with excel. I would really encourage everyone to look at and follow the
+ISO8601 format.
+
+```{r}
+production$date = date(production$ProdPeriod)
+unique(production$date)
+
+# make a sequence
+date_seq = seq(min(production$date), max(production$date), by = "month")
+
+# compare this
+single_well <- production %>%
+  filter(EPAssetsId == 2225574) %>%
+  spread(key=ProdType, value=Volume)
+
+# with this
+single_well <- production %>%
+  filter(EPAssetsId == 2225574) %>%
+  select(date, ProdType, Volume) %>%
+  spread(key=ProdType, value=Volume)
+```
+
 There are two packages I use for dealing with missing values. Most machine learning models and correlation analyses need complete, clean datasets, so 
 missing values tend to be a bane of our data science existence. I will cover 
 a column imputer framework next session, but tidyr has some great functions 
@@ -153,22 +153,31 @@ for dealing with NA (not applicable) values: `drop_na`, `fill`, and `replace_na`
 ```{r}
 single_well
 
-single_well %>% drop_na()
+single_well %>% tidyr::drop_na()
 
 single_well %>% tidyr::fill(.direction="up")
 
-single_well %>% 
+single_well %>% tidyr::replace_na(.,list(`Water Production (Bbls)`=0))
 ```
-
 
 ## Feature engineering w/ dplyr
 
-Dplyr provides a consistent interface for data munging.
+Dplyr provides a consistent interface for data munging, as well as provides
+a grammer of data manipulation focused on verbs or actions. Here is an example
+of how I might organize a single well. I'm going to break these functions down 
+one by one and walk through the cheat sheet for everyone.
 
 https://dplyr.tidyverse.org/
 
 ```{r}
-
+single_well %>%
+  filter(date > ymd('2016-01-01')) %>%
+  mutate(year = year(date)) %>%
+  rename(gas_prod = `Gas Production (MMcf)`) %>%
+  select(year, gas_prod) %>%
+  group_by(year) %>%
+  summarise(mean_gas = mean(gas_prod)) %>%
+  arrange(mean_gas)
 ```
 
 ## Visualization w/ ggplot2
@@ -180,7 +189,29 @@ will be the best, but ggplot2 often beats any other tool I use.
 https://ggplot2.tidyverse.org/
 
 ```{r}
+a_couple_wells = sample(production$EPAssetsId,25)
 
+volumes <- production %>%
+  select(date, EPAssetsId, ProdType, Volume) %>%
+  filter(EPAssetsId %in% a_couple_wells) %>%
+  spread(key=ProdType, value=Volume) %>%
+  rename(
+    cond_bbls = 'Condensate Production (Bbls)',
+    gas_mmcf = 'Gas Production (MMcf)',
+    oil_bbls = 'Oil Production (Bbls)',
+    water_bbls = 'Water Production (Bbls)'
+    )
+
+
+ggplot(volumes) +
+  geom_line(aes(x=date, y=gas_mmcf, group=EPAssetsId))
+
+ggplot(volumes) +
+  geom_histogram(aes(x=gas_mmcf))
+
+ggplot(volumes) +
+  geom_histogram(aes(x = gas_mmcf)) +
+  facet_wrap(. ~ EPAssetsId)
 ```
 
 
