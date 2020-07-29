@@ -21,6 +21,7 @@ The agenda for this 1 hour bootcamp includes:
 We will need the following libraries for this bootcamp
 
 ```{r}
+#install.packages('tidyverse')
 library(tidyverse)
 library(lubridate)
 library(tidyr)
@@ -92,6 +93,7 @@ to use in machine learning models or summarize properly. For example, if you
 wanted to facet a ggplot among several groups, you will need a long table.
 
 ```{r}
+unique(production$ProdType)
 # why long plots are useful
 ggplot(production) +
   geom_histogram(aes(x=Volume)) +
@@ -103,6 +105,8 @@ But we can pivot tables back and forth relatively easily in R using the tidyr pa
 https://tidyr.tidyverse.org/
 
 ```{r}
+
+production
 # long to wide
 prod_wide = spread(
   production, 
@@ -110,12 +114,16 @@ prod_wide = spread(
   value=Volume
   )
 
+treatments
+
 # wide to long
 treat_long = gather(
   treatments, 
   'IntervalTop','IntervalBase', 
   key="interval",
   value="md")
+
+treat_long
 ```
 
 ## Dates and times w/ lubridate
@@ -138,11 +146,16 @@ single_well <- production %>%
   filter(EPAssetsId == 2225574) %>%
   spread(key=ProdType, value=Volume)
 
+single_well
+
 # with this
 single_well <- production %>%
   filter(EPAssetsId == 2225574) %>%
   select(date, ProdType, Volume) %>%
   spread(key=ProdType, value=Volume)
+
+single_well$well_id = 2225574
+single_well
 ```
 
 There are two packages I use for dealing with missing values. Most machine learning models and correlation analyses need complete, clean datasets, so 
@@ -170,9 +183,21 @@ one by one and walk through the cheat sheet for everyone.
 https://dplyr.tidyverse.org/
 
 ```{r}
+library(janitor)
+single_well %>%
+  janitor::clean_names()
+```
+
+```{r}
+high_gas = function(col){
+  x = 3
+  x
+}
+
 single_well %>%
   filter(date > ymd('2016-01-01')) %>%
   mutate(year = year(date)) %>%
+  mutate(high_gas_bool = high_gas(`Gas Production (MMcf)`)) %>%
   rename(gas_prod = `Gas Production (MMcf)`) %>%
   select(year, gas_prod) %>%
   group_by(year) %>%
@@ -202,6 +227,7 @@ volumes <- production %>%
     water_bbls = 'Water Production (Bbls)'
     )
 
+volumes
 
 ggplot(volumes) +
   geom_line(aes(x=date, y=gas_mmcf, group=EPAssetsId))
