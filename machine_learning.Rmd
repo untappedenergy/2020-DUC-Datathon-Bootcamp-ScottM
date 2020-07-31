@@ -5,8 +5,7 @@ date: "7/29/2020"
 output: html_document
 ---
 
-This notebook provides a very short and high level introducction to machine
-learning using the MLR package. The agenda for this 1 hour bootcamp includes:
+This notebook provides a very short and high level introduction to feature engineering and exploratory data analysis (EDA). The agenda for this 1 hour bootcamp includes:
 
 1. A TED talk on EDA, features, and machine learning (15 min talk)
 2. Exploratory data analysis
@@ -81,6 +80,7 @@ sum(unique(well_header$ep_assets_id) %in% unique(prod_wide$ep_assets_id))
 # make surface geom
 surface = st_as_sf(well_header, coords = c('surf_longitude','surf_latitude'), crs=4326) %>%
   sf::st_transform(., crs=st_crs(2956))
+
 bottom = st_as_sf(well_header, coords = c('bh_longitude','bh_latitude'), crs=4326) %>%
   sf::st_transform(., crs=st_crs(2956))
 
@@ -88,6 +88,9 @@ distances = sf::st_distance(surface$geometry, bottom$geometry, by_element = TRUE
 
 header = well_header %>%
   mutate(lateral_dist_m = as.numeric(distances))
+
+ggplot(surface) +
+  geom_sf()
 
 ggplot(header) +
   geom_histogram(aes(x=lateral_dist_m),bins=50)
@@ -124,10 +127,23 @@ header = header %>%
 
 ggplot(header) +
   geom_point(aes(x=final_drill_date, y=cum_production_hours))
+
+header %>% write_csv('./output/header.csv')
+```
+
+# Make a feature with slope of production hours vs. drill_date
+```{r}
+header = header %>%
+  dplyr::mutate(
+    prod_hours_vs_drill_date = cum_production_hours
+    /as.numeric(final_drill_date-min(final_drill_date))
+    )
 ```
 
 # What features correlate with eachother?
 ```{r}
+library(corrplot)
+
 num_header = header %>%
   select(-x1) %>%
   dplyr::select_if(., is.numeric) %>%
@@ -160,15 +176,6 @@ b) differentiating categories/continuous variables
 c) common-sense
 d) crazy ideas
 
-# Make a feature with slope of production hours vs. drill_date
-```{r}
-header = header %>%
-  dplyr::mutate(
-    prod_hours_vs_drill_date = cum_production_hours
-    /as.numeric(final_drill_date-min(final_drill_date))
-    )
-```
-
 # Unsupervised Learning
 Finally, I wanted to introduce some clustering techniques that you might want to 
 consider for categorizing you data. Clustering completely depends on 'distance',
@@ -187,7 +194,7 @@ num_header = num_header %>%
   mutate(pamk_clust = kmeans$pamobject$clustering)
 
 # Automated density-based clustering
-dbs = dbscan(num_header, eps=10000, MinPts = 3)
+dbs = dbscan(num_header, eps=5000, MinPts = 6)
 num_header = num_header %>%
   mutate(dbs_clust = dbs$cluster)
 
@@ -199,5 +206,3 @@ ggplot(num_header) +
   geom_point(aes(x=prod_hours_vs_drill_date, y=cum_oil_production_bbls, color=as.factor(pamk_clust))) +
   scale_x_log10()
 ```
-
-
