@@ -2,7 +2,7 @@
 
 ## An Interactive Introduction to Unsupervised Learning
 
-This is the repository to accompany my presentation at Untapped Energy on January 21, 2021, which provides an interactive introduction to unsupervised learning with Python.
+This is the repository to accompany my presentation at Untapped Energy on January 21, 2020 (before North America imploded into a wierd alternative reality), which provides an interactive introduction to unsupervised learning with Python.
 
 You've probably been introduced to supervised learning techniques, where you try to predict a numeric, binary, or categorical target variable from numerous features. But what if you don't have a target? What if you're trying to reduce the dimensionality of your data, find similar observations, or identify patterns from many parameters? Unsupervised learning may be less widely understood in the energy industry than its supervised partner, but it can be incredibly useful. This provides a hands on introduction to some of the most popular unsupervised learning techniques, with a focus on demystifying some of the terminology and providing a simple, intuitive understanding of the fundamental concepts. 
 
